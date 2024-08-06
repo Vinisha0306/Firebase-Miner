@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../helper/auth_model.dart';
+import '../helper/database.dart';
 
 class SignupPage extends StatelessWidget {
   @override
@@ -44,8 +48,26 @@ class SignupPage extends StatelessWidget {
                 height: 20,
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
+                onPressed: () async {
+                  User? user = await AuthHelper.authHelper.signUp(
+                    email: email.text,
+                    password: password.text,
+                  );
+
+                  if (user != null) {
+                    await FireDatabase.fireDatabase.addUser(user: user);
+                    await FireDatabase.fireDatabase.getUser();
+                    Navigator.pushNamed(context, '/login');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'Enter Valid UserName Or Password',
+                        ),
+                        backgroundColor: Colors.red.withOpacity(0.6),
+                      ),
+                    );
+                  }
                 },
                 child: Text('Sign Up'),
               ),

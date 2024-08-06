@@ -4,10 +4,16 @@ import 'package:flutter/material.dart';
 
 import '../helper/auth_model.dart';
 import '../helper/database.dart';
+import '../model/chat_model.dart';
 import '../model/userModel.dart';
 import 'login_page.dart';
 
-class UserPage extends StatelessWidget {
+class UserPage extends StatefulWidget {
+  @override
+  State<UserPage> createState() => _UserPageState();
+}
+
+class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,21 +128,35 @@ class UserPage extends StatelessWidget {
             allUsers.removeWhere(
                 (e) => FireDatabase.fireDatabase.currentUser.uid == e.uid);
             print('allUsers Length :: ${allUsers.length}');
+            List<ChatModel> allChats;
 
-            return GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/chat');
-              },
-              child: ListView.builder(
-                itemCount: allUsers.length,
-                itemBuilder: (context, index) => ListTile(
+            if (allUsers.isNotEmpty) {
+              allChats =
+                  FireDatabase.fireDatabase.getAllUserLastChat(users: allUsers);
+            } else {
+              allChats = List.generate(
+                  allUsers.length,
+                  (index) => ChatModel(
+                      DateTime.now(), 'No Any Chat Yet!!', 'sent', 'unSeen'));
+            }
+            return ListView.builder(
+              itemCount: allUsers.length,
+              itemBuilder: (context, index) => GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/chat',
+                    arguments: allUsers[index],
+                  );
+                },
+                child: ListTile(
                   leading: CircleAvatar(
                     foregroundImage: NetworkImage(
                       allUsers[index].photoURL,
                     ),
                   ),
                   subtitle: Text(
-                    allUsers[index].email,
+                    allChats[index].msg,
                   ),
                   title: Text(
                     allUsers[index].displayName,

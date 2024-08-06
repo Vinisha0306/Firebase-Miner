@@ -10,10 +10,12 @@ class ChatModel {
   );
 
   factory ChatModel.fromMap(Map data) => ChatModel(
-        DateTime.fromMillisecondsSinceEpoch(int.parse(data['time'])),
-        data['msg'],
-        data['type'],
-        data['status'],
+        DateTime.fromMillisecondsSinceEpoch(
+          int.parse(data['time'] ?? '123434535'),
+        ),
+        data['msg'] ?? '',
+        data['type'] ?? '',
+        data['status'] ?? '',
       );
 
   Map<String, dynamic> get toMap => {

@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../model/chat_model.dart';
 import '../model/userModel.dart';
 import 'auth_model.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 
 class FireDatabase {
   FireDatabase._() {
@@ -146,13 +146,31 @@ class FireDatabase {
         .get();
 
     List<QueryDocumentSnapshot> docs = data.docs;
-    int length = docs.length;
-    ChatModel lastChat = ChatModel.fromMap(docs[length - 1] as Map);
-    print("lasChat : $lastChat");
+    List list = docs.map((e) => e.data()).toList();
+    int length = list.length;
+    print('length :: $length');
+    ChatModel lastChat = ChatModel.fromMap(list[length - 1]);
+    print("lastChat : $lastChat");
 
-    return length != 0
+    lastChat = length != 0
         ? lastChat
         : ChatModel(DateTime.now(), 'msg', 'type', 'status');
+
+    print('lastChat :: ${lastChat.msg}');
+    return lastChat;
+  }
+
+  List<ChatModel> getAllUserLastChat({required List<UserModel> users}) {
+    List<ChatModel> allChat = List.generate(
+        users.length,
+        (index) =>
+            ChatModel(DateTime.now(), 'No Any Chat Yet!!', 'sent', 'unSeen'));
+    users.forEach((e) async {
+      ChatModel chat = await getLastChat(user: e);
+      allChat[users.indexOf(e)] = chat;
+    });
+
+    return allChat;
   }
 
   Future<void> seenMsg(
