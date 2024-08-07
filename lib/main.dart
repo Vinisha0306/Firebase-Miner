@@ -6,6 +6,8 @@ import 'package:firebase_miner/page/signUpPage.dart';
 import 'package:firebase_miner/page/splashScreen.dart';
 import 'package:firebase_miner/page/userPage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'controller/themeController.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -13,7 +15,13 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeController(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,9 +29,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      themeMode: Provider.of<ThemeController>(context).isdark
+          ? ThemeMode.dark
+          : ThemeMode.light,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),

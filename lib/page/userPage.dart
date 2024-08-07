@@ -1,10 +1,11 @@
 import 'package:firebase_miner/page/profilePage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../controller/themeController.dart';
 import '../helper/auth_model.dart';
 import '../helper/database.dart';
-import '../model/chat_model.dart';
 import '../model/userModel.dart';
 import 'login_page.dart';
 
@@ -18,7 +19,9 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Drawer(
-        backgroundColor: Colors.white,
+        backgroundColor: Provider.of<ThemeController>(context).isdark
+            ? Colors.black
+            : Colors.white,
         child: Padding(
           padding: const EdgeInsets.only(top: 40, left: 20),
           child: Column(
@@ -49,7 +52,6 @@ class _UserPageState extends State<UserPage> {
                 child: const ListTile(
                   leading: Icon(
                     CupertinoIcons.chat_bubble_2_fill,
-                    color: Colors.black,
                   ),
                   title: Text('Chats'),
                 ),
@@ -66,7 +68,6 @@ class _UserPageState extends State<UserPage> {
                 child: const ListTile(
                   leading: Icon(
                     CupertinoIcons.profile_circled,
-                    color: Colors.black,
                   ),
                   title: Text('All User'),
                 ),
@@ -84,7 +85,6 @@ class _UserPageState extends State<UserPage> {
                 child: const ListTile(
                   leading: Icon(
                     Icons.settings,
-                    color: Colors.black,
                   ),
                   title: Text('Setting'),
                 ),
@@ -104,7 +104,6 @@ class _UserPageState extends State<UserPage> {
                 child: const ListTile(
                   leading: Icon(
                     Icons.logout,
-                    color: Colors.black,
                   ),
                   title: Text('Log Out'),
                 ),
@@ -114,6 +113,21 @@ class _UserPageState extends State<UserPage> {
         ),
       ),
       appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              Provider.of<ThemeController>(context, listen: false)
+                  .ChangeTheme();
+            },
+            icon: Provider.of<ThemeController>(context).isdark
+                ? const Icon(
+                    Icons.sunny,
+                  )
+                : const Icon(
+                    CupertinoIcons.moon_fill,
+                  ),
+          ),
+        ],
         title: const Text('User Page'),
       ),
       body: StreamBuilder(
@@ -128,17 +142,17 @@ class _UserPageState extends State<UserPage> {
             allUsers.removeWhere(
                 (e) => FireDatabase.fireDatabase.currentUser.uid == e.uid);
             print('allUsers Length :: ${allUsers.length}');
-            List<ChatModel> allChats;
-
-            if (allUsers.isNotEmpty) {
-              allChats =
-                  FireDatabase.fireDatabase.getAllUserLastChat(users: allUsers);
-            } else {
-              allChats = List.generate(
-                  allUsers.length,
-                  (index) => ChatModel(
-                      DateTime.now(), 'No Any Chat Yet!!', 'sent', 'unSeen'));
-            }
+            // List<ChatModel> allChats;
+            //
+            // if (allUsers.isNotEmpty) {
+            //   allChats =
+            //       FireDatabase.fireDatabase.getAllUserLastChat(users: allUsers);
+            // } else {
+            //   allChats = List.generate(
+            //       allUsers.length,
+            //       (index) => ChatModel(
+            //           DateTime.now(), 'No Any Chat Yet!!', 'sent', 'unSeen'));
+            // }
             return ListView.builder(
               itemCount: allUsers.length,
               itemBuilder: (context, index) => GestureDetector(
@@ -148,6 +162,20 @@ class _UserPageState extends State<UserPage> {
                     '/chat',
                     arguments: allUsers[index],
                   );
+                  // .then((value) {
+                  //   if (allUsers.isNotEmpty) {
+                  //     allChats = FireDatabase.fireDatabase
+                  //         .getAllUserLastChat(users: allUsers);
+                  //     print("allChats :: ${allChats[allChats.length - 1].msg}");
+                  //   } else {
+                  //     allChats = List.generate(
+                  //       allUsers.length,
+                  //       (index) => ChatModel(DateTime.now(),
+                  //           'No Any Chat Yet!!', 'sent', 'unSeen'),
+                  //     );
+                  //   }
+                  //   setState(() {});
+                  // }
                 },
                 child: ListTile(
                   leading: CircleAvatar(
@@ -155,9 +183,9 @@ class _UserPageState extends State<UserPage> {
                       allUsers[index].photoURL,
                     ),
                   ),
-                  subtitle: Text(
-                    allChats[index].msg,
-                  ),
+                  // subtitle: Text(
+                  //   allChats[index].msg,
+                  // ),
                   title: Text(
                     allUsers[index].displayName,
                   ),

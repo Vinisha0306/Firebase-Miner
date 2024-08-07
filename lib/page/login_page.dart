@@ -17,6 +17,34 @@ class LoginPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          TextButton(
+            onPressed: () async {
+              User? user = await AuthHelper.authHelper.anonymousLoginIn();
+              if (user != null) {
+                var pref = await SharedPreferences.getInstance();
+                // await FireDatabase.fireDatabase.getUser();
+
+                pref.setBool(Global.isLogin, true);
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => UserPage(),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text(
+                      'Enter Valid UserName Or Password',
+                    ),
+                    backgroundColor: Colors.red.withOpacity(0.6),
+                  ),
+                );
+              }
+            },
+            child: const Text('Guest Login'),
+          ),
+        ],
         title: const Text('Login'),
       ),
       body: Padding(
