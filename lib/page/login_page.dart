@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_miner/page/HomePage.dart';
 import 'package:firebase_miner/page/chatPage.dart';
 import 'package:firebase_miner/page/userPage.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,7 +29,7 @@ class LoginPage extends StatelessWidget {
                 pref.setBool(Global.isLogin, true);
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (context) => UserPage(),
+                    builder: (context) => HomePage(),
                   ),
                 );
               } else {
@@ -93,7 +94,7 @@ class LoginPage extends StatelessWidget {
                     pref.setBool(Global.isLogin, true);
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => UserPage(),
+                        builder: (context) => HomePage(),
                       ),
                     );
                   } else {
@@ -127,7 +128,7 @@ class LoginPage extends StatelessWidget {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserPage(),
+                        builder: (context) => HomePage(),
                       ),
                     );
                   }

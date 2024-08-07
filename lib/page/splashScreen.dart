@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (isLoggedIn != null) {
         (isLoggedIn)
             ? FireDatabase.fireDatabase.getUser().then(
-                  (value) => Navigator.pushReplacementNamed(context, '/user'),
+                  (value) => Navigator.pushReplacementNamed(context, '/home'),
                 )
             : Navigator.pushReplacementNamed(context, '/login');
       } else {

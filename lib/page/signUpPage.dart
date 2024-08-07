@@ -69,7 +69,7 @@ class SignupPage extends StatelessWidget {
                     );
                   }
                 },
-                child: Text('Sign Up'),
+                child: const Text('Sign Up'),
               ),
             ],
           ),

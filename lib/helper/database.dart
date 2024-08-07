@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import '../model/chat_model.dart';
 import '../model/userModel.dart';
 import 'auth_model.dart';
@@ -222,5 +223,25 @@ class FireDatabase {
         .update(
       {'msg': chat.msg},
     );
+  }
+
+  Future<void> deleteChat(
+      {required UserModel userModel, required ChatModel chat}) async {
+    await fireStore
+        .collection(userCollectionPath)
+        .doc(currentUser.uid)
+        .collection(friendsCollectionPath)
+        .doc(userModel.uid)
+        .collection(chatCollectionPath)
+        .doc(chat.time.millisecondsSinceEpoch.toString())
+        .delete();
+    await fireStore
+        .collection(userCollectionPath)
+        .doc(userModel.uid)
+        .collection(friendsCollectionPath)
+        .doc(currentUser.uid)
+        .collection(chatCollectionPath)
+        .doc(chat.time.millisecondsSinceEpoch.toString())
+        .delete();
   }
 }

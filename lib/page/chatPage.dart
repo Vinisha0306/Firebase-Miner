@@ -1,5 +1,7 @@
 import 'package:firebase_miner/extension.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../helper/database.dart';
 import '../model/chat_model.dart';
 import '../model/userModel.dart';
@@ -11,6 +13,19 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController controller = TextEditingController();
+  late ScrollController scrollController;
+
+  @override
+  void initState() {
+    scrollController = ScrollController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,29 +33,61 @@ class _ChatPageState extends State<ChatPage> {
         ModalRoute.of(context)!.settings.arguments as UserModel;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
+        title: Text(userModel.displayName),
       ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder(
-                stream:
-                    FireDatabase.fireDatabase.getChats(userModel: userModel),
-                builder: (context, snapShots) {
-                  if (snapShots.hasData) {
-                    List<ChatModel> chats = snapShots.data?.docs
-                            .map(
-                              (e) => ChatModel.fromMap(
-                                e.data(),
+              stream: FireDatabase.fireDatabase.getChats(userModel: userModel),
+              builder: (context, snapShots) {
+                if (snapShots.hasData) {
+                  List<ChatModel> chats = snapShots.data?.docs
+                          .map(
+                            (e) => ChatModel.fromMap(
+                              e.data(),
+                            ),
+                          )
+                          .toList() ??
+                      [];
+                  return ListView.builder(
+                    itemCount: chats.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onLongPress: () {
+                          if (chats[index].type == 'sent') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                content: GestureDetector(
+                                  onTap: () {
+                                    FireDatabase.fireDatabase.deleteChat(
+                                      userModel: userModel,
+                                      chat: chats[index],
+                                    );
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Row(
+                                    children: [
+                                      Text(
+                                        'Delete',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ),
-                            )
-                            .toList() ??
-                        [];
-                    return ListView.builder(
-                      reverse: true,
-                      itemCount: chats.length,
-                      itemBuilder: (context, index) {
-                        return Align(
+                            );
+                          }
+                        },
+                        child: Align(
                           alignment: chats[index].type == 'sent'
                               ? Alignment.centerRight
                               : Alignment.centerLeft,
@@ -77,15 +124,17 @@ class _ChatPageState extends State<ChatPage> {
                               ],
                             ),
                           ),
-                        );
-                      },
-                    );
-                  } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                }),
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -93,6 +142,30 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 Expanded(
                   child: TextField(
+                    onSubmitted: (val) {
+                      if (controller.text != '') {
+                        FireDatabase.fireDatabase
+                            .sendChat(
+                              user: userModel,
+                              chat: ChatModel(
+                                DateTime.now(),
+                                controller.text,
+                                'sent',
+                                'unseen',
+                              ),
+                            )
+                            .then(
+                              (value) => controller.clear(),
+                            );
+                      }
+                      scrollController.animateTo(
+                        scrollController.position.maxScrollExtent,
+                        duration: const Duration(seconds: 1),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    scrollController: scrollController,
+                    textInputAction: TextInputAction.send,
                     controller: controller,
                     decoration: InputDecoration(
                       hintText: 'Type a message',
@@ -105,19 +178,27 @@ class _ChatPageState extends State<ChatPage> {
                 IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () {
-                    FireDatabase.fireDatabase
-                        .sendChat(
-                          user: userModel,
-                          chat: ChatModel(
-                            DateTime.now(),
-                            controller.text,
-                            'sent',
-                            'unseen',
-                          ),
-                        )
-                        .then(
-                          (value) => controller.clear(),
-                        );
+                    if (controller.text != '') {
+                      FireDatabase.fireDatabase
+                          .sendChat(
+                            user: userModel,
+                            chat: ChatModel(
+                              DateTime.now(),
+                              controller.text,
+                              'sent',
+                              'unseen',
+                            ),
+                          )
+                          .then(
+                            (value) => controller.clear(),
+                          );
+                    }
+
+                    scrollController.animateTo(
+                      scrollController.position.maxScrollExtent,
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeInOut,
+                    );
                   },
                 ),
               ],

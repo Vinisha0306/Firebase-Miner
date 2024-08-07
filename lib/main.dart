@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_miner/page/HomePage.dart';
 import 'package:firebase_miner/page/chatPage.dart';
 import 'package:firebase_miner/page/login_page.dart';
 import 'package:firebase_miner/page/profilePage.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(),
       initialRoute: '/',
       routes: {
-        '/': (context) => SplashScreen(),
+        '/': (context) => const SplashScreen(),
+        '/home': (context) => HomePage(),
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignupPage(),
         '/chat': (context) => ChatPage(),

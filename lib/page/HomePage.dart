@@ -1,8 +1,7 @@
-import 'package:firebase_miner/page/HomePage.dart';
 import 'package:firebase_miner/page/profilePage.dart';
+import 'package:firebase_miner/page/userPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/themeController.dart';
@@ -11,12 +10,12 @@ import '../helper/database.dart';
 import '../model/userModel.dart';
 import 'login_page.dart';
 
-class UserPage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  State<UserPage> createState() => _UserPageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _UserPageState extends State<UserPage> {
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,12 +48,7 @@ class _UserPageState extends State<UserPage> {
               const Divider(),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(),
-                    ),
-                  );
+                  Navigator.pop(context);
                 },
                 child: const ListTile(
                   leading: Icon(
@@ -65,7 +59,12 @@ class _UserPageState extends State<UserPage> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserPage(),
+                    ),
+                  );
                 },
                 child: const ListTile(
                   leading: Icon(
@@ -130,7 +129,7 @@ class _UserPageState extends State<UserPage> {
                   ),
           ),
         ],
-        title: const Text('User Page'),
+        title: const Text('Chats'),
       ),
       body: StreamBuilder(
         stream: FireDatabase.fireDatabase.getAllUser(),
@@ -159,29 +158,11 @@ class _UserPageState extends State<UserPage> {
               itemCount: allUsers.length,
               itemBuilder: (context, index) => GestureDetector(
                 onTap: () {
-                  FireDatabase.fireDatabase
-                      .addFriends(user: allUsers[index])
-                      .then(
-                        (value) => showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor:
-                                Provider.of<ThemeController>(context).isdark
-                                    ? Colors.black
-                                    : Colors.white,
-                            title: const Text('Add Successful in Friend..!.'),
-                            content: GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Image(
-                                image: AssetImage('lib/assests/added.png'),
-                                width: 70,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
+                  Navigator.pushNamed(
+                    context,
+                    '/chat',
+                    arguments: allUsers[index],
+                  );
                   // .then((value) {
                   //   if (allUsers.isNotEmpty) {
                   //     allChats = FireDatabase.fireDatabase
@@ -203,9 +184,9 @@ class _UserPageState extends State<UserPage> {
                       allUsers[index].photoURL,
                     ),
                   ),
-                  subtitle: Text(
-                    allUsers[index].email,
-                  ),
+                  // subtitle: Text(
+                  //   allChats[index].msg,
+                  // ),
                   title: Text(
                     allUsers[index].displayName,
                   ),
